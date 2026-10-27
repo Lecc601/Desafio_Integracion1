@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integración Numérica · Desafío La Paz, Bolivia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation & Header -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-inner font-bold text-lg mono">
+                    ∫dx
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold tracking-tight">Métodos Numéricos · La Paz, Bolivia</h1>
+                        <span class="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">Solucionario & Laboratorio</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Trapecio Compuesto, Simpson 1/3, Simpson 3/8 y Métodos Combinados</p>
+                </div>
+            </div>
+
+            <!-- Main View Switcher -->
+            <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                <button onclick="switchMainTab('simulador')" id="tab-btn-simulador" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all bg-emerald-600 text-white shadow">
+                    Calculadora & Explicación
+                </button>
+                <button onclick="switchMainTab('matriz')" id="tab-btn-matriz" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-300 hover:text-white">
+                    Tabla de Todos los Ejercicios
+                </button>
+                <button onclick="switchMainTab('formulario')" id="tab-btn-formulario" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-300 hover:text-white">
+                    Formulario & Grupos
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ==========================================
+             VIEW 1: SIMULADOR, INGRESO Y EXPLICACIÓN
+             ========================================== -->
+        <div id="view-simulador" class="space-y-6">
+            
+            <!-- Exercise Selector Bar -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                            Selecciona un Ejercicio del Desafío o Personaliza los Datos
+                        </h2>
+                        <p class="text-xs text-slate-500">Haz clic en cualquier ejercicio para cargar sus datos, su modelo matemático y su explicación detallada.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-slate-500">Filtro por Grupo:</span>
+                        <select id="group-filter" onchange="filterByGroup(this.value)" class="text-xs bg-slate-100 border border-slate-300 rounded-lg px-2.5 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="ALL">Todos los Ejercicios (19 - 27 + Test)</option>
+                            <option value="A">Grupo A (Ej. 19 y 23)</option>
+                            <option value="B">Grupo B (Ej. 20 y 25)</option>
+                            <option value="C">Grupo C (Ej. 21 y 24)</option>
+                            <option value="D">Grupo D (Ej. 19 y 22)</option>
+                            <option value="E">Grupo E (Ej. 20 y 27)</option>
+                            <option value="F">Grupo F (Ej. 23 y 26)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Exercise Pills -->
+                <div id="exercise-buttons-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2">
+                    <!-- Rendered dynamically by JS -->
+                </div>
+            </div>
+
+            <!-- Main Workspace Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- LEFT COLUMN (5 cols): Explanation + Data Entry -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- Detailed Explanation Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-5 py-3.5 text-white flex justify-between items-center">
+                            <div>
+                                <span id="exp-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Ejercicio 19</span>
+                                <h3 id="exp-title" class="text-base font-bold mt-0.5">Transporte Urbano</h3>
+                            </div>
+                            <span id="exp-group-tag" class="text-xs bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg font-medium">Grupos A, D</span>
+                        </div>
+                        <div class="p-5 space-y-3 text-sm">
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Contexto y Problema (Adaptación La Paz)</h4>
+                                <p id="exp-context" class="text-slate-700 leading-relaxed text-xs sm:text-sm"></p>
+                            </div>
+                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Modelo Matemático e Integral</h4>
+                                <p id="exp-formula" class="mono text-xs sm:text-sm font-semibold text-emerald-800 break-words"></p>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Explicación del Procedimiento</h4>
+                                <p id="exp-procedure" class="text-slate-600 text-xs leading-relaxed"></p>
+                            </div>
+                            <!-- Extra Switch for Exercise 26 or 27 if applicable -->
+                            <div id="exp-variant-box" class="hidden pt-2 border-t border-slate-100">
+                                <label class="block text-xs font-bold text-emerald-700 mb-1.5">Variante de Cálculo del Ejercicio:</label>
+                                <div id="exp-variant-buttons" class="flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Input Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                Introducción y Edición de Datos
+                            </h3>
+                            <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                                <button onclick="setInputMode('table')" id="mode-btn-table" class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm">
+                                    Datos Tabulados (x, y)
+                                </button>
+                                <button onclick="setInputMode('function')" id="mode-btn-function" class="px-2.5 py-1 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900">
+                                    Función f(x)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Validation Error Banner -->
+                        <div id="validation-alert" class="hidden mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs space-y-1">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span id="validation-alert-title">Error de validación</span>
+                            </div>
+                            <p id="validation-alert-msg" class="text-red-700 pl-5"></p>
+                        </div>
+
+                        <!-- TABULATED DATA INPUT MODE -->
+                        <div id="input-section-table" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Valores de <span id="label-x-var" class="mono text-emerald-700">x</span> (separados por coma)</label>
+                                    <textarea id="input-x-list" rows="2" class="w-full mono text-xs p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ej: 0, 1, 2, 3, 4"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Valores de <span id="label-y-var" class="mono text-emerald-700">y = f(x)</span> (separados por coma)</label>
+                                    <textarea id="input-y-list" rows="2" class="w-full mono text-xs p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ej: 0, 14, 39, 69, 95"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Transform / Scale factor for physical units -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Transformar nodo y → g(y)</label>
+                                    <input type="text" id="input-table-transform" class="w-full mono text-xs px-2.5 py-1.5 rounded-lg border border-slate-300" value="y" title="Usa 'y' para directo, o ej. Math.PI*(y/2)*(y/2)">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Factor Escala Final</label>
+                                    <input type="text" id="input-scale-factor" class="w-full mono text-xs px-2.5 py-1.5 rounded-lg border border-slate-300" value="1" title="Ej: 1/3600 para convertir s a h">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Unidades Resultado</label>
+                                    <input type="text" id="input-units" class="w-full text-xs px-2.5 py-1.5 rounded-lg border border-slate-300" value="u²">
+                                </div>
+                            </div>
+
+                            <!-- Interactive Row Editor -->
+                            <div>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <span class="text-xs font-semibold text-slate-600">Editor interactivo de pares (xᵢ, yᵢ)</span>
+                                    <div class="flex gap-1.5">
+                                        <button onclick="addTableRow()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium px-2.5 py-1 rounded-lg border border-emerald-200 transition">+ Añadir fila</button>
+                                        <button onclick="removeLastTableRow()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-2.5 py-1 rounded-lg border border-slate-300 transition">- Quitar última</button>
+                                    </div>
+                                </div>
+                                <div class="max-h-48 overflow-y-auto custom-scrollbar border border-slate-200 rounded-xl">
+                                    <table class="w-full text-xs text-left">
+                                        <thead class="bg-slate-100 text-slate-600 sticky top-0">
+                                            <tr>
+                                                <th class="py-1.5 px-3 w-12">i</th>
+                                                <th class="py-1.5 px-3">Abscisa (xᵢ)</th>
+                                                <th class="py-1.5 px-3">Ordenada (yᵢ)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="interactive-pairs-tbody" class="divide-y divide-slate-100 mono">
+                                            <!-- Populated by JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FUNCTION INPUT MODE -->
+                        <div id="input-section-function" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Función integrando <span class="mono text-emerald-700">f(x)</span> (sintaxis matemática JS)</label>
+                                <input type="text" id="input-fn-expr" class="w-full mono text-xs p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ej: Math.cosh(x/24) o x*x">
+                                <p class="text-[11px] text-slate-400 mt-1">Puedes usar <code class="text-slate-600">x</code>, <code class="text-slate-600">pi</code>, <code class="text-slate-600">sin(x)</code>, <code class="text-slate-600">cos(x)</code>, <code class="text-slate-600">cosh(x)</code>, <code class="text-slate-600">sqrt(x)</code>, <code class="text-slate-600">pow(a,b)</code>, <code class="text-slate-600">x^2</code>.</p>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Límite inf. (<span class="mono">a</span>)</label>
+                                    <input type="text" id="input-fn-a" class="w-full mono text-xs p-2 rounded-xl border border-slate-300" value="0">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Límite sup. (<span class="mono">b</span>)</label>
+                                    <input type="text" id="input-fn-b" class="w-full mono text-xs p-2 rounded-xl border border-slate-300" value="2">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Subintervalos (<span class="mono">n</span>)</label>
+                                    <input type="number" id="input-fn-n" min="1" max="500" step="1" class="w-full mono text-xs p-2 rounded-xl border border-slate-300" value="8">
+                                </div>
+                            </div>
+
+                            <!-- Quick n buttons for comparison (n=4, n=6, n=8, n=12) -->
+                            <div class="flex items-center justify-between bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+                                <span class="text-xs font-medium text-slate-600">Prueba rápida de convergencia:</span>
+                                <div class="flex gap-1.5">
+                                    <button onclick="setQuickN(4)" class="px-2 py-1 text-xs font-semibold mono rounded bg-white border border-slate-300 hover:bg-emerald-50 hover:border-emerald-400">n = 4</button>
+                                    <button onclick="setQuickN(6)" class="px-2 py-1 text-xs font-semibold mono rounded bg-white border border-slate-300 hover:bg-emerald-50 hover:border-emerald-400">n = 6</button>
+                                    <button onclick="setQuickN(8)" class="px-2 py-1 text-xs font-semibold mono rounded bg-white border border-slate-300 hover:bg-emerald-50 hover:border-emerald-400">n = 8</button>
+                                    <button onclick="setQuickN(12)" class="px-2 py-1 text-xs font-semibold mono rounded bg-white border border-slate-300 hover:bg-emerald-50 hover:border-emerald-400">n = 12</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reference Value Input & Action Button -->
+                        <div class="mt-4 pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+                            <div class="flex-grow">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Valor Exacto / Referencia (<span class="mono">I_ref</span> opcional)</label>
+                                <input type="text" id="input-ref-val" class="w-full mono text-xs p-2 rounded-xl border border-slate-300" placeholder="Vacío si no existe valor exacto">
+                            </div>
+                            <button onclick="runCalculation()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs uppercase tracking-wider rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                Calcular Integración
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN (7 cols): Results, Graph & Weights Table -->
+                <div class="lg:col-span-7 space-y-6">
+
+                    <!-- Discretization & Spacing Status Bar -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div id="status-icon-box" class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold mono text-sm">
+                                OK
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Parámetros de Malla</span>
+                                    <span id="mesh-badge" class="text-[11px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-200">Equiespaciado</span>
+                                </div>
+                                <p id="mesh-summary" class="text-xs sm:text-sm font-semibold text-slate-800 mono mt-0.5">
+                                    n = 7 subintervalos | h = 1.000000 | [a, b] = [0, 7]
+                                </p>
+                            </div>
+                        </div>
+                        <div id="conversion-badge-container" class="hidden text-right">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600 block">Conversión SI / Equivalencia</span>
+                            <span id="conversion-badge-text" class="text-xs font-bold mono text-slate-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg inline-block mt-0.5"></span>
+                        </div>
+                    </div>
+
+                    <!-- Method Results Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        <!-- Card 1: Trapecio Compuesto -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-1.5 h-full bg-sky-500"></div>
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">1. Trapecio Compuesto</span>
+                                    <span class="text-[11px] text-slate-400 font-medium">Cualquier n ≥ 1</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div id="res-trap-val" class="text-xl font-bold mono text-slate-900">—</div>
+                                    <div id="res-trap-raw" class="text-xs text-slate-500 mono mt-0.5"></div>
+                                </div>
+                            </div>
+                            <div id="res-trap-err" class="mt-3 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex justify-between">
+                                <span>Error: —</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Simpson 1/3 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-1.5 h-full bg-emerald-500"></div>
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">2. Simpson 1/3 Simple/Comp.</span>
+                                    <span id="badge-s13-req" class="text-[11px] font-medium px-2 py-0.5 rounded">Requiere n par</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div id="res-s13-val" class="text-xl font-bold mono text-slate-900">—</div>
+                                    <div id="res-s13-raw" class="text-xs text-slate-500 mono mt-0.5"></div>
+                                </div>
+                            </div>
+                            <div id="res-s13-err" class="mt-3 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex justify-between">
+                                <span>Error: —</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Simpson 3/8 -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-1.5 h-full bg-indigo-500"></div>
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200">3. Simpson 3/8 Simple/Comp.</span>
+                                    <span id="badge-s38-req" class="text-[11px] font-medium px-2 py-0.5 rounded">Requiere n músc. de 3</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div id="res-s38-val" class="text-xl font-bold mono text-slate-900">—</div>
+                                    <div id="res-s38-raw" class="text-xs text-slate-500 mono mt-0.5"></div>
+                                </div>
+                            </div>
+                            <div id="res-s38-err" class="mt-3 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex justify-between">
+                                <span>Error: —</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Simpson Combinado (Para n impar como n=7 o n=9) -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-1.5 h-full bg-amber-500"></div>
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">4. Método Combinado / Ref.</span>
+                                    <span id="badge-comb-desc" class="text-[11px] text-slate-500 font-medium">Adaptativo según n</span>
+                                </div>
+                                <div class="mt-3">
+                                    <div id="res-comb-val" class="text-xl font-bold mono text-slate-900">—</div>
+                                    <div id="res-comb-raw" class="text-xs text-slate-500 mono mt-0.5"></div>
+                                </div>
+                            </div>
+                            <div id="res-comb-err" class="mt-3 pt-2.5 border-t border-slate-100 text-xs text-slate-600 flex justify-between">
+                                <span>Error: —</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Interactive Canvas Graph -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Gráfico del Área Bajo la Curva y Nodos</h3>
+                                <p class="text-xs text-slate-500">Representación visual de los trapecios y la curva interpolada en el intervalo <span id="graph-interval-label" class="mono font-semibold">[a, b]</span>.</p>
+                            </div>
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500/30 border border-emerald-600 inline-block"></span> Área Integrada</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-900 inline-block"></span> Nodos (xᵢ, g(yᵢ))</span>
+                            </div>
+                        </div>
+                        <div class="w-full h-64 bg-slate-50 rounded-xl border border-slate-200 relative overflow-hidden">
+                            <canvas id="integration-canvas" class="w-full h-full block"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Weights & Nodes Table -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Tabla de Nodos, Evaluaciones y Factores (Pesos)</h3>
+                                <p class="text-xs text-slate-500">Muestra cómo cada método pondera cada nodo <span class="mono">i = 0, 1, ..., n</span>.</p>
+                            </div>
+                            <span id="weights-formula-hint" class="text-xs mono bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600">
+                                T = h · Σ(wᵢ · fᵢ)
+                            </span>
+                        </div>
+                        <div class="max-h-72 overflow-x-auto overflow-y-auto custom-scrollbar">
+                            <table class="w-full text-xs text-left border-collapse">
+                                <thead class="bg-slate-100 text-slate-600 sticky top-0 border-b border-slate-200">
+                                    <tr>
+                                        <th class="py-2.5 px-3 font-bold">Nodo i</th>
+                                        <th class="py-2.5 px-3 font-bold">xᵢ</th>
+                                        <th class="py-2.5 px-3 font-bold">Dato orig. yᵢ</th>
+                                        <th class="py-2.5 px-3 font-bold text-emerald-800">Integrando f(xᵢ)</th>
+                                        <th class="py-2.5 px-3 font-bold text-sky-700">Peso Trap.</th>
+                                        <th class="py-2.5 px-3 font-bold text-emerald-700">Peso S. 1/3</th>
+                                        <th class="py-2.5 px-3 font-bold text-indigo-700">Peso S. 3/8</th>
+                                        <th class="py-2.5 px-3 font-bold text-amber-800">Peso Comb.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="weights-table-body" class="divide-y divide-slate-100 mono">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==========================================
+             VIEW 2: MATRIZ DE TODOS LOS EJERCICIOS
+             ========================================== -->
+        <div id="view-matriz" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">Solucionario Completo Automatizado</span>
+                        <h2 class="text-xl font-bold text-slate-900 mt-1">Tabla General de Resultados (Ejercicios 19 al 27 + Validación)</h2>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+                            Todos los resultados mostrados a continuación son calculados en tiempo real por los algoritmos de integración numérica de esta aplicación y verificados con el solucionario docente.
+                        </p>
+                    </div>
+                    <button onclick="renderAllExercisesSummaryTable()" class="self-start md:self-auto px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-2 shrink-0">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Recalcular Todos los Ejercicios
+                    </button>
+                </div>
+
+                <!-- Complete Results Table -->
+                <div class="mt-5 overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white uppercase tracking-wider text-[11px]">
+                                <th class="py-3 px-3 rounded-tl-xl">Ejercicio / Contexto</th>
+                                <th class="py-3 px-3">Grupos</th>
+                                <th class="py-3 px-3">Modelo / Integral</th>
+                                <th class="py-3 px-3">n y Paso h</th>
+                                <th class="py-3 px-3 text-sky-300">Trapecio Compuesto</th>
+                                <th class="py-3 px-3 text-emerald-300">Simpson (1/3, 3/8 o Comb.)</th>
+                                <th class="py-3 px-3 text-amber-300">Valor Exacto / Ref.</th>
+                                <th class="py-3 px-3">Error % (Simpson)</th>
+                                <th class="py-3 px-3 rounded-tr-xl text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-exercises-tbody" class="divide-y divide-slate-200">
+                            <!-- Dynamically computed & rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Detailed Cards of All Exercises Explanation -->
+                <div class="mt-8 pt-6 border-t border-slate-200">
+                    <h3 class="text-base font-bold text-slate-900 mb-4">Resumen Explicativo y Notas Docentes por Ejercicio</h3>
+                    <div id="all-explanations-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             VIEW 3: FORMULARIO, GRUPOS Y CRITERIOS
+             ========================================== -->
+        <div id="view-formulario" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left 7 Cols: Formulas -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                        <h2 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3">Formulario Oficial Permitido</h2>
+                        
+                        <div class="space-y-4 text-sm">
+                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                                <span class="text-xs font-bold uppercase text-slate-500">1. Tamaño de paso uniforme</span>
+                                <p class="mono font-bold text-slate-900 mt-1">h = (b − a) / n</p>
+                                <p class="text-xs text-slate-600 mt-1">Donde <span class="mono">n</span> es el número de subintervalos y existen <span class="mono">n + 1</span> nodos equiespaciados <span class="mono">x₀, x₁, ..., xₙ</span>.</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-sky-50/60 border border-sky-200">
+                                <span class="text-xs font-bold uppercase text-sky-800">2. Regla del Trapecio Compuesto (Cualquier n ≥ 1)</span>
+                                <p class="mono font-bold text-sky-950 mt-1">T = h · [ (f₀ + fₙ)/2 + Σ(i=1 a n−1) fᵢ ]</p>
+                                <p class="text-xs text-sky-900 mt-1">También expresado como: <span class="mono">T = (h/2) · [ f₀ + 2f₁ + 2f₂ + ... + 2fₙ₋₁ + fₙ ]</span>.</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                                <span class="text-xs font-bold uppercase text-emerald-800">3. Regla de Simpson 1/3 Compuesta (Requiere n PAR)</span>
+                                <p class="mono font-bold text-emerald-950 mt-1">S₁/₃ = (h / 3) · [ f₀ + fₙ + 4 · Σ(i impar) fᵢ + 2 · Σ(i par interior) fᵢ ]</p>
+                                <p class="text-xs text-emerald-900 mt-1">Patrón de pesos: <span class="mono">[1, 4, 2, 4, 2, ..., 4, 1]</span> multiplicados por <span class="mono">h/3</span>.</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-indigo-50/60 border border-indigo-200">
+                                <span class="text-xs font-bold uppercase text-indigo-800">4. Regla de Simpson 3/8 Compuesta (Requiere n múltiplo de 3)</span>
+                                <p class="mono font-bold text-indigo-950 mt-1">S₃/₈ = (3h / 8) · [ f₀ + fₙ + 3 · Σ(i no músc. de 3) fᵢ + 2 · Σ(i músc. de 3 interior) fᵢ ]</p>
+                                <p class="text-xs text-indigo-900 mt-1">Patrón de pesos para n=3: <span class="mono">[1, 3, 3, 1]</span> multiplicados por <span class="mono">3h/8</span>.</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-amber-50/60 border border-amber-200">
+                                <span class="text-xs font-bold uppercase text-amber-800">5. Combinación de Métodos y Cálculo de Errores</span>
+                                <p class="mono font-bold text-amber-950 mt-1">Eₐ = |I_ref − I_aprox| &nbsp;&nbsp;|&nbsp;&nbsp; E_% = 100 · (Eₐ / |I_ref|)</p>
+                                <p class="text-xs text-amber-900 mt-1">
+                                    • Con <strong>7 subintervalos</strong> (Ej. 19 y 20): se combina <strong>Simpson 1/3</strong> en los primeros 4 subintervalos <span class="mono">[x₀, x₄]</span> y <strong>Simpson 3/8</strong> en los últimos 3 subintervalos <span class="mono">[x₄, x₇]</span>.<br>
+                                    • Con <strong>9 subintervalos</strong> (Ej. 21): se puede combinar Simpson 1/3 en 8 subintervalos más Trapecio en el noveno, o aplicar Simpson 3/8 puro al ser 9 múltiplo de 3.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 5 Cols: Groups & Rubric -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-base font-bold text-slate-900 mb-3">Asignación de Ejercicios por Grupo</h3>
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead class="bg-slate-100 text-slate-600 border-b border-slate-200">
+                                <tr>
+                                    <th class="py-2 px-3">Grupo</th>
+                                    <th class="py-2 px-3">Ejercicios Asignados</th>
+                                    <th class="py-2 px-3">Dificultad</th>
+                                    <th class="py-2 px-3 text-right">Cargar</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold">Grupo A</td>
+                                    <td class="py-2.5 px-3">Ej. 19 (Transporte) y Ej. 23 (Agua)</td>
+                                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-sky-50 text-sky-700 rounded">Intermedio</span></td>
+                                    <td class="py-2.5 px-3 text-right"><button onclick="selectGroupAndGo('A', '19')" class="text-emerald-600 font-semibold hover:underline">Ver →</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold">Grupo B</td>
+                                    <td class="py-2.5 px-3">Ej. 20 (Elasticidad) y Ej. 25 (Satélite)</td>
+                                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-sky-50 text-sky-700 rounded">Intermedio</span></td>
+                                    <td class="py-2.5 px-3 text-right"><button onclick="selectGroupAndGo('B', '20')" class="text-emerald-600 font-semibold hover:underline">Ver →</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold">Grupo C</td>
+                                    <td class="py-2.5 px-3">Ej. 21 (Topografía) y Ej. 24 (Cardioide)</td>
+                                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded">Intermedio-alto</span></td>
+                                    <td class="py-2.5 px-3 text-right"><button onclick="selectGroupAndGo('C', '21')" class="text-emerald-600 font-semibold hover:underline">Ver →</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold">Grupo D</td>
+                                    <td class="py-2.5 px-3">Ej. 19 (Transporte) y Ej. 22 (Catenaria)</td>
+                                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-sky-50 text-sky-700 rounded">Intermedio</span></td>
+                                    <td class="py-2.5 px-3 text-right"><button onclick="selectGroupAndGo('D', '22')" class="text-emerald-600 font-semibold hover:underline">Ver →</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold">Grupo E</td>
+                                    <td class="py-2.5 px-3">Ej. 20 (Elasticidad) y Ej. 27 (Volumen)</td>
+                                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded">Intermedio-alto</span></td>
+                                    <td class="py-2.5 px-3 text-right"><button onclick="selectGroupAndGo('E', '27')" class="text-emerald-600 font-semibold hover:underline">Ver →</button></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2.5 px-3 font-bold">Grupo F</td>
+                                    <td class="py-2.5 px-3">Ej. 23 (Agua) y Ej. 26 (Lago Erie/Titicaca)</td>
+                                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 bg-rose-50 text-rose-700 rounded">Alto</span></td>
+                                    <td class="py-2.5 px-3 text-right"><button onclick="selectGroupAndGo('F', '26')" class="text-emerald-600 font-semibold hover:underline">Ver →</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="text-base font-bold text-slate-900 mb-3">Rúbrica de Evaluación (100 Puntos)</h3>
+                        <ul class="space-y-2 text-xs text-slate-700">
+                            <li class="flex justify-between py-1.5 border-b border-slate-100"><span>Interpretación y contexto</span><span class="font-bold mono">10 pts</span></li>
+                            <li class="flex justify-between py-1.5 border-b border-slate-100"><span>Modelo, unidades y límites</span><span class="font-bold mono">10 pts</span></li>
+                            <li class="flex justify-between py-1.5 border-b border-slate-100"><span>Cálculo manual (planteamiento y sustitución)</span><span class="font-bold mono">20 pts</span></li>
+                            <li class="flex justify-between py-1.5 border-b border-slate-100"><span>Resultados y análisis de errores</span><span class="font-bold mono">15 pts</span></li>
+                            <li class="flex justify-between py-1.5 border-b border-slate-100"><span>Aplicación web funcional y validada</span><span class="font-bold mono text-emerald-700">25 pts</span></li>
+                            <li class="flex justify-between py-1.5 border-b border-slate-100"><span>Informe técnico y conclusiones</span><span class="font-bold mono">15 pts</span></li>
+                            <li class="flex justify-between py-1.5"><span>Repositorio GitHub y evidencias</span><span class="font-bold mono">5 pts</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-10 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+            <span>Desafío Grupal de Métodos Numéricos · Integración Numérica aplicada a problemas de La Paz, Bolivia</span>
+            <span class="mono">Precisión ≥ 6 decimales · Sin librerías externas de integración</span>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         JAVASCRIPT ENGINE & NUMERICAL METHODS
+         ========================================== -->
+    <script>
+        /**
+         * BASE DE DATOS DE TODOS LOS EJERCICIOS DEL DOCUMENTO
+         * Incluye datos tabulados, funciones, transformaciones, factores de escala,
+         * valores exactos de referencia y explicaciones paso a paso.
+         */
+        const EXERCISES_DB = {
+            '19': {
+                id: '19',
+                shortTitle: 'Ej. 19 · Transporte',
+                title: 'Ejercicio 19 · Transporte Urbano (Distancia de un vehículo)',
+                groups: ['A', 'D'],
+                mode: 'table',
+                xVar: 't (s)',
+                yVar: 'v (mi/h)',
+                xData: [0, 1, 2, 3, 4, 5, 6, 7],
+                yData: [0, 14, 39, 69, 95, 114, 129, 139],
+                transform: 'y',
+                scaleFactor: '1/3600',
+                units: 'mi',
+                refValue: '',
+                combinedStrategy: 'S13_4_S38_3', // 4 subintervalos S1/3 + 3 subintervalos S3/8
+                siConversion: (valMi) => `${(valMi * 1609.344).toFixed(2)} m`,
+                context: 'Un vehículo experimental de transporte urbano en La Paz registra su velocidad cada segundo durante los primeros 7 segundos de aceleración. Se requiere estimar la distancia total recorrida integrando la velocidad respecto al tiempo.',
+                formula: 'd = ∫₀⁷ v(t) dt × (1 h / 3600 s)',
+                procedure: 'Como existen n = 7 subintervalos con paso uniforme h = 1 s, el método del Trapecio Compuesto suma las velocidades ponderadas (529.5 mi/h·s) y las divide entre 3600 s/h para obtener millas. Para lograr mayor orden de precisión en n = 7 (impar), el solucionario combina Simpson 1/3 en los primeros 4 subintervalos [0, 4] y Simpson 3/8 en los últimos 3 subintervalos [4, 7], obteniendo d_S = 0.147072 mi (≈ 236.69 m).'
+            },
+            '20': {
+                id: '20',
+                shortTitle: 'Ej. 20 · Elasticidad',
+                title: 'Ejercicio 20 · Ensayo de Elasticidad (Trabajo de una fuerza)',
+                groups: ['B', 'E'],
+                mode: 'table',
+                xVar: 'x (in)',
+                yVar: 'F (lb)',
+                xData: [0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8],
+                yData: [0, 0.85, 1.30, 1.60, 1.87, 2.14, 2.34, 2.52],
+                transform: 'y',
+                scaleFactor: '1',
+                units: 'lb·in',
+                refValue: '',
+                combinedStrategy: 'S13_4_S38_3',
+                siConversion: (valLbIn) => `${(valLbIn * 0.1129848).toFixed(3)} J`,
+                context: 'En un laboratorio de materiales se estira una banda elástica no lineal y se mide la fuerza restauradora F (en libras) para distintos desplazamientos x (en pulgadas). Se desea determinar el trabajo mecánico total realizado.',
+                formula: 'W = ∫₀²·⁸ F(x) dx',
+                procedure: 'Se tienen 8 puntos equiespaciados con paso h = 0.4 in (n = 7 subintervalos). Mediante Trapecio Compuesto se obtiene W_T = 4.544000 lb·in. Aplicando Simpson combinado (Simpson 1/3 en [0, 1.6] con 4 subintervalos + Simpson 3/8 en [1.6, 2.8] con 3 subintervalos) se obtiene W_S = 4.577167 lb·in, que equivale a aproximadamente 0.517 Joules en el Sistema Internacional.'
+            },
+            '21': {
+                id: '21',
+                shortTitle: 'Ej. 21 · Topografía',
+                title: 'Ejercicio 21 · Perfil Topográfico (Área bajo el perfil)',
+                groups: ['C'],
+                mode: 'table',
+                xVar: 'x',
+                yVar: 'y (altura)',
+                xData: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                yData: [1.3, 3.7, 4.6, 4.4, 2.7, 2.5, 3.6, 5.3, 6.0, 5.9],
+                transform: 'y',
+                scaleFactor: '1',
+                units: 'u²',
+                refValue: '',
+                combinedStrategy: 'S13_8_TRAP_1', // 8 subintervalos S1/3 + 1 subintervalo Trapecio
+                siConversion: null,
+                context: 'A partir de la gráfica de elevación de un corte topográfico (inspirado en las laderas paceñas), se digitalizan las alturas y respecto a la posición horizontal x entre x = 1 y x = 10 para estimar el área transversal.',
+                formula: 'A = ∫₁¹⁰ y(x) dx',
+                procedure: 'Con 10 coordenadas digitalizadas se tienen n = 9 subintervalos de paso h = 1. El método del Trapecio arroja exactamente 36.400000 u². Como n = 9 es múltiplo de 3, puede aplicarse Simpson 3/8 puro (36.862500 u²), o bien la combinación indicada en el solucionario docente: Simpson 1/3 sobre los primeros 8 subintervalos [1, 9] más un Trapecio simple en el noveno subintervalo [9, 10], que produce 36.850000 u².'
+            },
+            '22': {
+                id: '22',
+                shortTitle: 'Ej. 22 · Catenaria',
+                title: 'Ejercicio 22 · Cable Suspendido (Longitud de arco de catenaria)',
+                groups: ['D'],
+                mode: 'function',
+                xVar: 'x (ft)',
+                yVar: '√(1 + (y′)²)',
+                fnExpr: 'cosh(x/24)',
+                a: '-12',
+                b: '26',
+                n: 8,
+                units: 'ft',
+                refValue: '43.89884118', // 24*(sinh(26/24) - sinh(-12/24))
+                siConversion: (valFt) => `${(valFt * 0.3048).toFixed(4)} m`,
+                context: 'Un cable pesado suspendido entre dos apoyos adopta la forma de una catenaria y = a cosh(x/a) con parámetro a = 24 ft entre x = −12 ft y x = 26 ft (modelo geométrico didáctico inspirado en cables suspendidos).',
+                formula: 'L = ∫₋₁₂²⁶ √(1 + [sinh(x/24)]²) dx = ∫₋₁₂²⁶ cosh(x/24) dx',
+                procedure: 'Usando la identidad hiperbólica 1 + sinh²(u) = cosh²(u), el integrando de longitud de arco se simplifica a cosh(x/24). El valor analítico exacto es 24·[sinh(26/24) − sinh(−12/24)] = 43.898841 ft. Con n = 8 subintervalos (h = 4.75 ft), el Trapecio da 44.042044 ft y Simpson 1/3 da 43.899213 ft (error de apenas 0.00085%).'
+            },
+            '23': {
+                id: '23',
+                shortTitle: 'Ej. 23 · Caudal Agua',
+                title: 'Ejercicio 23 · Red de Abastecimiento de Agua (Caudal en tubería)',
+                groups: ['A', 'F'],
+                mode: 'function',
+                xVar: 'r (in)',
+                yVar: '2π·r·v(r)',
+                fnExpr: '160 * pi * x * pow(max(0, 1 - x/0.25), 1/7)',
+                a: '0',
+                b: '0.25',
+                n: 8,
+                units: 'in³/s',
+                refValue: '12.82817000', // 49 * pi / 12
+                siConversion: (valIn3) => `${(valIn3 * 0.016387064).toFixed(4)} L/s`,
+                context: 'Para analizar el suministro de agua potable en una tubería circular de radio R = 0.25 in con flujo turbulento, el perfil de velocidad sigue la ley de potencia v(r) = 80·(1 − r/R)^(1/7) in/s.',
+                formula: 'Q = ∫₀⁰·²⁵ 2π·r · 80(1 − r/0.25)^(1/7) dr = 49π / 12 ≈ 12.828170 in³/s',
+                procedure: 'Integrando en anillos concéntricos diferenciales (2πr dr) desde el centro (r = 0) hasta la pared (r = 0.25 in) con n = 8 subintervalos (h = 0.03125 in): Trapecio entrega 11.681778 in³/s y Simpson 1/3 entrega 12.151244 in³/s. La convergencia numérica es más lenta que en otros problemas porque la derivada del perfil tiende a infinito en la pared (r → 0.25).'
+            },
+            '24': {
+                id: '24',
+                shortTitle: 'Ej. 24 · Cardioide',
+                title: 'Ejercicio 24 · Diseño de una Trayectoria (Longitud de cardioide)',
+                groups: ['C'],
+                mode: 'function',
+                xVar: 't (rad)',
+                yVar: 'ds/dt',
+                fnExpr: '20 * sin(x/2)',
+                a: '0',
+                b: '2*pi',
+                n: 8,
+                units: 'u',
+                refValue: '80',
+                siConversion: null,
+                context: 'Se diseña un circuito cerrado con forma de cardioide definida paramétricamente por x(t) = 2b cos(t) − b cos(2t), y(t) = 2b sin(t) − b sin(2t) con b = 5 para t ∈ [0, 2π].',
+                formula: 'L = ∫₀²π √([x′(t)]² + [y′(t)]²) dt = ∫₀²π 20·sin(t/2) dt = 80',
+                procedure: 'Derivando x(t) e y(t) con b = 5 y simplificando trigonométricamente √([x′]² + [y′]²), el diferencial de longitud de arco resulta exactamente 20·sin(t/2). Su integral analítica entre 0 y 2π es 80. Con n = 8 subintervalos (h = π/4): Trapecio obtiene 78.969264 y Simpson 1/3 obtiene 80.010767 (error porcentual de 0.013%).'
+            },
+            '25': {
+                id: '25',
+                shortTitle: 'Ej. 25 · Satélite',
+                title: 'Ejercicio 25 · Energía Gravitatoria (Satélite a 800 km)',
+                groups: ['B'],
+                mode: 'function',
+                xVar: 'y (m)',
+                yVar: 'm·g(y) (N)',
+                fnExpr: '500 * 9.81 * pow(6371000 / (6371000 + x), 2)',
+                a: '0',
+                b: '800000',
+                n: 8,
+                units: 'J',
+                refValue: '3486236786.662925', // 500 * 9.81 * 6371000 * 800000 / (6371000 + 800000)
+                siConversion: (valJ) => `${(valJ / 1e9).toFixed(8)} × 10⁹ J`,
+                context: 'Se desea estimar el incremento de energía potencial gravitatoria ΔU al elevar un satélite de comunicaciones de m = 500 kg (como el Túpac Katari) desde la superficie terrestre hasta una órbita de h = 800 km (800,000 m), considerando la variación de la gravedad con la altitud.',
+                formula: 'ΔU = m·g₀ ∫₀⁸⁰⁰⁰⁰⁰ R² / (R + y)² dy = m·g₀·R·h / (R + h)',
+                procedure: 'Con m = 500 kg, g₀ = 9.81 m/s² y R = 6,371,000 m, la integral exacta es 3.486236787 × 10⁹ J. Evaluando con n = 8 subintervalos (h = 100,000 m): Trapecio arroja 3.48662008 × 10⁹ J y Simpson 1/3 arroja 3.48623690 × 10⁹ J, prácticamente idéntico al valor analítico.'
+            },
+            '26': {
+                id: '26',
+                shortTitle: 'Ej. 26 · Lago Erie/Titicaca',
+                title: 'Ejercicio 26 · Superficie de Lago (Lago Erie y Adaptación al Titicaca)',
+                groups: ['F'],
+                mode: 'table',
+                xVar: 'x (mi)',
+                yVar: 'w(x) (mi)',
+                // Tabla común estandarizada cada 20 millas entre x=40 y x=260 (11 subintervalos)
+                xData: [40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260],
+                yData: [0, 24, 38, 46, 52, 57, 55, 53, 47, 42, 34, 0],
+                transform: 'y',
+                scaleFactor: '1',
+                units: 'mi²',
+                refValue: '9940',
+                combinedStrategy: 'S13_8_S38_3',
+                variants: [
+                    {
+                        label: 'Lago Erie (x ∈ [40, 260] mi, Ref: 9,940 mi²)',
+                        xVar: 'x (mi)', yVar: 'w(x) (mi)', units: 'mi²', refValue: '9940',
+                        xData: [40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260],
+                        yData: [0, 24, 38, 46, 52, 57, 55, 53, 47, 42, 34, 0],
+                        transform: 'y', scaleFactor: '1'
+                    },
+                    {
+                        label: 'Adaptación Lago Titicaca (x ∈ [0, 180] km, Ref: 8,372 km²)',
+                        xVar: 'x (km)', yVar: 'w(x) (km)', units: 'km²', refValue: '8372',
+                        xData: [0, 20, 40, 60, 80, 100, 120, 140, 160, 180],
+                        yData: [0, 32, 54, 65, 62, 58, 52, 48, 38, 0],
+                        transform: 'y', scaleFactor: '1'
+                    }
+                ],
+                siConversion: null,
+                context: 'Se estima el área superficial del lago Erie integrando las anchuras transversales w(x) medidas cada 20 millas entre x = 40 mi y x = 260 mi (valor de referencia 9,940 mi²). Incluye además una adaptación geográfica al Lago Titicaca en kilómetros (referencia 8,372 km²). Puedes editar las anchuras medidas en la tabla.',
+                formula: 'A = ∫₄₀²⁶⁰ w(x) dx  (Lago Erie)  |  Error% = 100·|A_num − 9940| / 9940',
+                procedure: 'Al depender de mediciones sobre el mapa, el docente establece una tabla común de anchuras cada 20 millas (h = 20 mi, n = 11 subintervalos). Puedes modificar cualquier anchura según tu propia medición o alternar con el botón superior a la adaptación del Lago Titicaca.'
+            },
+            '27': {
+                id: '27',
+                shortTitle: 'Ej. 27 · Volumen/Área',
+                title: 'Ejercicio 27 · Geometría de Objeto Alargado (Volumen y Superficie)',
+                groups: ['E'],
+                mode: 'table',
+                xVar: 'z (in)',
+                yVar: 'd (in)',
+                xData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                yData: [0, 2.6, 3.2, 4.8, 5.6, 6.0, 6.2, 6.0, 5.6, 4.8, 3.3, 2.6, 0],
+                transform: 'pi * pow(y/2, 2)',
+                scaleFactor: '1',
+                units: 'in³',
+                refValue: '',
+                combinedStrategy: 'AUTO',
+                variants: [
+                    {
+                        label: 'Volumen V = π ∫ r² dz (in³)',
+                        xVar: 'z (in)', yVar: 'd (in)', units: 'in³', refValue: '',
+                        xData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        yData: [0, 2.6, 3.2, 4.8, 5.6, 6.0, 6.2, 6.0, 5.6, 4.8, 3.3, 2.6, 0],
+                        transform: 'pi * pow(y/2, 2)', scaleFactor: '1'
+                    },
+                    {
+                        label: 'Integral superficial simplificada S = 2π ∫ r dz (in²)',
+                        xVar: 'z (in)', yVar: 'd (in)', units: 'in²', refValue: '',
+                        xData: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        yData: [0, 2.6, 3.2, 4.8, 5.6, 6.0, 6.2, 6.0, 5.6, 4.8, 3.3, 2.6, 0],
+                        transform: '2 * pi * (y/2)', scaleFactor: '1'
+                    }
+                ],
+                siConversion: null,
+                context: 'Con mediciones del diámetro d (en pulgadas) a lo largo del eje z de un objeto de revolución entre z = 0 y z = 12 in (n = 12 subintervalos), se pide calcular su volumen V y analizar la diferencia entre la fórmula simplificada de superficie y el área real de revolución.',
+                formula: 'r = d/2  ⇒  V = π ∫₀¹² r(z)² dz  |  S_simpl = 2π ∫₀¹² r(z) dz  vs  S_real = 2π ∫₀¹² r√(1+(r′)²) dz',
+                procedure: 'Con n = 12 subintervalos (par y múltiplo de 3): para el Volumen, Trapecio entrega V_T = 199.404740 in³ y Simpson 1/3 entrega V_S = 201.842092 in³. Para la fórmula superficial simplificada S = 2π∫r dz, Trapecio da 159.278748 in² y Simpson 1/3 da 162.315620 in². Nota teórica: S = 2π∫r dz omite el factor de pendiente √(1 + (r′)²), por lo que subestima el área superficial verdadera de revolución.'
+            },
+            'TEST': {
+                id: 'TEST',
+                shortTitle: 'Validación f(x)=x²',
+                title: 'Prueba de Validación Obligatoria · f(x) = x² en [0, 2]',
+                groups: ['A', 'B', 'C', 'D', 'E', 'F'],
+                mode: 'function',
+                xVar: 'x',
+                yVar: 'f(x) = x²',
+                fnExpr: 'x^2',
+                a: '0',
+                b: '2',
+                n: 4,
+                units: 'u²',
+                refValue: '2.6666666667', // 8/3
+                siConversion: null,
+                context: 'Requisito obligatorio de verificación mínima de código (Sección 6 y 9 de la guía): integrar f(x) = x² desde a = 0 hasta b = 2, cuyo valor analítico exacto es 8/3 = 2.666667, comparando n = 4 y n = 8.',
+                formula: 'I = ∫₀² x² dx = [x³/3]₀² = 8/3 ≈ 2.666667',
+                procedure: 'Al ser f(x) = x² un polinomio de segundo grado, las reglas de Simpson 1/3 y Simpson 3/8 son exactas (error 0.000000%) para cualquier n válido, entregando exactamente 2.666667. El método del Trapecio da 2.750000 para n = 4 y 2.687500 para n = 8.'
+            }
+        };
+
+        let currentExerciseId = '19';
+        let currentInputMode = 'table'; // 'table' or 'function'
+        let lastComputedPlotData = null;
+
+        /**
+         * EVALUADOR MATEMÁTICO SEGURO Y FLEXIBLE
+         * Soporta expresiones como sin, cos, tan, sinh, cosh, sqrt, pow, pi, e, y el operador ^
+         */
+        function evaluateMathExpression(exprStr, vars = {}) {
+            if (typeof exprStr === 'number') return exprStr;
+            let clean = String(exprStr).trim();
+            if (!clean) return NaN;
+
+            // Reemplazar potencias ^ por **
+            clean = clean.replace(/\^/g, '**');
+
+            const scopeKeys = ['x', 'y', 'r', 't', 'z', 'pi', 'PI', 'e', 'E', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh', 'sqrt', 'cbrt', 'pow', 'abs', 'exp', 'log', 'max', 'min'];
+            const scopeVals = [
+                vars.x ?? 0,
+                vars.y ?? 0,
+                vars.x ?? 0,
+                vars.x ?? 0,
+                vars.x ?? 0,
+                Math.PI,
+                Math.PI,
+                Math.E,
+                Math.E,
+                Math.sin,
+                Math.cos,
+                Math.tan,
+                Math.asin,
+                Math.acos,
+                Math.atan,
+                Math.sinh,
+                Math.cosh,
+                Math.tanh,
+                Math.sqrt,
+                Math.cbrt,
+                Math.pow,
+                Math.abs,
+                Math.exp,
+                Math.log,
+                Math.max,
+                Math.min
+            ];
+
+            try {
+                const fn = new Function(...scopeKeys, `"use strict"; return (${clean});`);
+                const res = fn(...scopeVals);
+                return typeof res === 'number' && !isNaN(res) ? res : NaN;
+            } catch (err) {
+                return NaN;
+            }
+        }
+
+        /**
+         * ALGORITMOS DE INTEGRACIÓN NUMÉRICA (IMPLEMENTACIÓN PURA)
+         */
+
+        // 1. Regla del Trapecio Compuesto
+        function compositeTrapezoid(fValues, h) {
+            const n = fValues.length - 1;
+            if (n < 1) return null;
+            const weights = new Array(n + 1).fill(1);
+            weights[0] = 0.5;
+            weights[n] = 0.5;
+
+            let weightedSum = 0;
+            for (let i = 0; i <= n; i++) {
+                weightedSum += weights[i] * fValues[i];
+            }
+            return {
+                integral: h * weightedSum,
+                weightedSum: weightedSum,
+                weights: weights.map(w => w === 0.5 ? '1/2' : '1')
+            };
+        }
+
+        // 2. Regla de Simpson 1/3 Compuesta (requiere n par >= 2)
+        function compositeSimpson13(fValues, h) {
+            const n = fValues.length - 1;
+            if (n < 2 || n % 2 !== 0) return null;
+
+            const weights = new Array(n + 1).fill(1);
+            for (let i = 1; i < n; i++) {
+                weights[i] = (i % 2 === 1) ? 4 : 2;
+            }
+
+            let sum = 0;
+            for (let i = 0; i <= n; i++) {
+                sum += weights[i] * fValues[i];
+            }
+
+            return {
+                integral: (h / 3) * sum,
+                weightedSum: sum,
+                weights: weights.map(w => `${w}/3`)
+            };
+        }
+
+        // 3. Regla de Simpson 3/8 Compuesta (requiere n múltiplo de 3 >= 3)
+        function compositeSimpson38(fValues, h) {
+            const n = fValues.length - 1;
+            if (n < 3 || n % 3 !== 0) return null;
+
+            const weights = new Array(n + 1).fill(1);
+            for (let i = 1; i < n; i++) {
+                weights[i] = (i % 3 === 0) ? 2 : 3;
+            }
+
+            let sum = 0;
+            for (let i = 0; i <= n; i++) {
+                sum += weights[i] * fValues[i];
+            }
+
+            return {
+                integral: (3 * h / 8) * sum,
+                weightedSum: sum,
+                weights: weights.map(w => `${3 * w}/8`)
+            };
+        }
+
+        // 4. Regla Combinada (para n impar como n=7, n=9, n=11, o respaldo óptimo)
+        function compositeCombinedSimpson(fValues, h, strategyHint = 'AUTO') {
+            const n = fValues.length - 1;
+            if (n < 1) return null;
+
+            // Caso especial del solucionario para Ej. 21 (n=9: S1/3 en 8 subintervalos + Trapecio en el 9no)
+            if (strategyHint === 'S13_8_TRAP_1' && n === 9) {
+                const part1 = compositeSimpson13(fValues.slice(0, 9), h);
+                const part2 = compositeTrapezoid(fValues.slice(8, 10), h);
+                const weights = new Array(n + 1).fill('');
+                for (let i = 0; i < 8; i++) weights[i] = (i === 0) ? '1/3' : (i % 2 === 1 ? '4/3' : '2/3');
+                weights[8] = '1/3 + 1/2';
+                weights[9] = '1/2';
+                return {
+                    integral: part1.integral + part2.integral,
+                    description: 'S1/3 [0..8] + Trap [8..9]',
+                    weights: weights
+                };
+            }
+
+            // Si n >= 5 y es impar (ej. n=5, 7, 11...): últimos 3 subintervalos con S3/8 y primeros (n-3) con S1/3
+            if (n >= 5 && n % 2 === 1) {
+                const splitIdx = n - 3; // par >= 2
+                const part1 = compositeSimpson13(fValues.slice(0, splitIdx + 1), h);
+                const part2 = compositeSimpson38(fValues.slice(splitIdx, n + 1), h);
+                const weights = new Array(n + 1).fill('');
+                for (let i = 0; i < splitIdx; i++) {
+                    weights[i] = (i === 0) ? '1/3' : (i % 2 === 1 ? '4/3' : '2/3');
+                }
+                weights[splitIdx] = '1/3 + 3/8';
+                weights[splitIdx + 1] = '9/8';
+                weights[splitIdx + 2] = '9/8';
+                weights[n] = '3/8';
+                return {
+                    integral: part1.integral + part2.integral,
+                    description: `S1/3 [0..${splitIdx}] + S3/8 [${splitIdx}..${n}]`,
+                    weights: weights
+                };
+            }
+
+            // Si n es par, el mejor método compuesto es Simpson 1/3
+            if (n % 2 === 0 && n >= 2) {
+                const s13 = compositeSimpson13(fValues, h);
+                return {
+                    integral: s13.integral,
+                    description: `Simpson 1/3 puro (n=${n})`,
+                    weights: s13.weights
+                };
+            }
+
+            // Si n=3, Simpson 3/8 puro
+            if (n % 3 === 0 && n >= 3) {
+                const s38 = compositeSimpson38(fValues, h);
+                return {
+                    integral: s38.integral,
+                    description: `Simpson 3/8 puro (n=${n})`,
+                    weights: s38.weights
+                };
+            }
+
+            // Si n=1, Trapecio
+            const trap = compositeTrapezoid(fValues, h);
+            return {
+                integral: trap.integral,
+                description: 'Trapecio simple (n=1)',
+                weights: trap.weights
+            };
+        }
+
+        /**
+         * GESTIÓN DE PESTAÑAS E INTERFAZ
+         */
+        function switchMainTab(tabName) {
+            const views = ['simulador', 'matriz', 'formulario'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`).classList.toggle('hidden', v !== tabName);
+                const btn = document.getElementById(`tab-btn-${v}`);
+                if (v === tabName) {
+                    btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all bg-emerald-600 text-white shadow';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-300 hover:text-white';
+                }
+            });
+
+            if (tabName === 'matriz') {
+                renderAllExercisesSummaryTable();
+            } else if (tabName === 'simulador' && lastComputedPlotData) {
+                setTimeout(() => drawIntegrationCanvas(lastComputedPlotData), 50);
+            }
+        }
+
+        function selectGroupAndGo(groupCode, exId) {
+            document.getElementById('group-filter').value = groupCode;
+            filterByGroup(groupCode);
+            loadExercise(exId);
+            switchMainTab('simulador');
+        }
+
+        function filterByGroup(groupCode) {
+            renderExerciseSelectorButtons(groupCode);
+        }
+
+        function renderExerciseSelectorButtons(groupFilter = 'ALL') {
+            const container = document.getElementById('exercise-buttons-container');
+            container.innerHTML = '';
+
+            Object.values(EXERCISES_DB).forEach(ex => {
+                if (groupFilter !== 'ALL' && !ex.groups.includes(groupFilter)) return;
+
+                const isSelected = ex.id === currentExerciseId;
+                const btn = document.createElement('button');
+                btn.onclick = () => loadExercise(ex.id);
+                btn.className = `p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                    isSelected
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm ring-2 ring-emerald-500/50'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`;
+
+                const badgeColor = isSelected ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-200 text-slate-600';
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor}">
+                            ${ex.mode === 'table' ? 'Tabla' : 'Función'}
+                        </span>
+                        <span class="text-[10px] opacity-75 font-mono">G:${ex.groups.join(',')}</span>
+                    </div>
+                    <div class="text-xs font-bold truncate">${ex.shortTitle}</div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function setInputMode(mode) {
+            currentInputMode = mode;
+            const isTable = mode === 'table';
+            document.getElementById('input-section-table').classList.toggle('hidden', !isTable);
+            document.getElementById('input-section-function').classList.toggle('hidden', isTable);
+
+            document.getElementById('mode-btn-table').className = isTable
+                ? 'px-2.5 py-1 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm'
+                : 'px-2.5 py-1 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900';
+
+            document.getElementById('mode-btn-function').className = !isTable
+                ? 'px-2.5 py-1 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm'
+                : 'px-2.5 py-1 rounded-md text-xs font-semibold transition-all text-slate-600 hover:text-slate-900';
+        }
+
+        function loadExercise(exId, variantIndex = 0) {
+            currentExerciseId = exId;
+            const ex = EXERCISES_DB[exId];
+            renderExerciseSelectorButtons(document.getElementById('group-filter').value);
+
+            // Actualizar tarjeta de explicación
+            document.getElementById('exp-badge').textContent = ex.id === 'TEST' ? 'Verificación de Código' : `Ejercicio ${ex.id}`;
+            document.getElementById('exp-title').textContent = ex.title;
+            document.getElementById('exp-group-tag').textContent = `Grupos: ${ex.groups.join(', ')}`;
+            document.getElementById('exp-context').textContent = ex.context;
+            document.getElementById('exp-formula').textContent = ex.formula;
+            document.getElementById('exp-procedure').textContent = ex.procedure;
+
+            // Variantes (Ej. 26 Erie/Titicaca o Ej. 27 Volumen/Superficie)
+            const variantBox = document.getElementById('exp-variant-box');
+            const variantBtns = document.getElementById('exp-variant-buttons');
+            if (ex.variants && ex.variants.length > 0) {
+                variantBox.classList.remove('hidden');
+                variantBtns.innerHTML = '';
+                ex.variants.forEach((v, idx) => {
+                    const b = document.createElement('button');
+                    b.onclick = () => loadExercise(exId, idx);
+                    b.className = `px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                        idx === variantIndex
+                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                            : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                    }`;
+                    b.textContent = v.label;
+                    variantBtns.appendChild(b);
+                });
+            } else {
+                variantBox.classList.add('hidden');
+            }
+
+            const activeData = (ex.variants && ex.variants[variantIndex]) ? ex.variants[variantIndex] : ex;
+
+            setInputMode(ex.mode);
+
+            if (ex.mode === 'table') {
+                document.getElementById('label-x-var').textContent = activeData.xVar || 'x';
+                document.getElementById('label-y-var').textContent = activeData.yVar || 'y';
+                document.getElementById('input-x-list').value = activeData.xData.join(', ');
+                document.getElementById('input-y-list').value = activeData.yData.join(', ');
+                document.getElementById('input-table-transform').value = activeData.transform || 'y';
+                document.getElementById('input-scale-factor').value = activeData.scaleFactor || '1';
+                document.getElementById('input-units').value = activeData.units || 'u²';
+                document.getElementById('input-ref-val').value = activeData.refValue || '';
+                syncTextareasToInteractiveTable();
+            } else {
+                document.getElementById('input-fn-expr').value = ex.fnExpr;
+                document.getElementById('input-fn-a').value = ex.a;
+                document.getElementById('input-fn-b').value = ex.b;
+                document.getElementById('input-fn-n').value = ex.n;
+                document.getElementById('input-units').value = ex.units || 'u²';
+                document.getElementById('input-scale-factor').value = '1';
+                document.getElementById('input-ref-val').value = ex.refValue || '';
+            }
+
+            runCalculation();
+        }
+
+        function setQuickN(nVal) {
+            document.getElementById('input-fn-n').value = nVal;
+            runCalculation();
+        }
+
+        /**
+         * SINCRONIZACIÓN ENTRE TEXTAREAS Y TABLA INTERACTIVA DE PARES (x, y)
+         */
+        function syncTextareasToInteractiveTable() {
+            const xRaw = document.getElementById('input-x-list').value.split(',').map(s => s.trim()).filter(s => s !== '');
+            const yRaw = document.getElementById('input-y-list').value.split(',').map(s => s.trim()).filter(s => s !== '');
+            const len = Math.max(xRaw.length, yRaw.length);
+
+            const tbody = document.getElementById('interactive-pairs-tbody');
+            tbody.innerHTML = '';
+
+            for (let i = 0; i < len; i++) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-1 px-3 text-slate-400 font-semibold">${i}</td>
+                    <td class="py-1 px-2">
+                        <input type="text" value="${xRaw[i] ?? ''}" oninput="syncInteractiveTableToTextareas()" class="pair-x-input w-full px-2 py-1 rounded border border-slate-200 focus:border-emerald-500 focus:outline-none">
+                    </td>
+                    <td class="py-1 px-2">
+                        <input type="text" value="${yRaw[i] ?? ''}" oninput="syncInteractiveTableToTextareas()" class="pair-y-input w-full px-2 py-1 rounded border border-slate-200 focus:border-emerald-500 focus:outline-none">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function syncInteractiveTableToTextareas() {
+            const xInputs = Array.from(document.querySelectorAll('.pair-x-input')).map(el => el.value.trim());
+            const yInputs = Array.from(document.querySelectorAll('.pair-y-input')).map(el => el.value.trim());
+            document.getElementById('input-x-list').value = xInputs.join(', ');
+            document.getElementById('input-y-list').value = yInputs.join(', ');
+        }
+
+        function addTableRow() {
+            const xInputs = Array.from(document.querySelectorAll('.pair-x-input')).map(el => parseFloat(el.value));
+            let nextX = 0;
+            if (xInputs.length >= 2 && !isNaN(xInputs[xInputs.length - 1]) && !isNaN(xInputs[xInputs.length - 2])) {
+                const step = xInputs[xInputs.length - 1] - xInputs[xInputs.length - 2];
+                nextX = Number((xInputs[xInputs.length - 1] + step).toFixed(4));
+            } else if (xInputs.length === 1 && !isNaN(xInputs[0])) {
+                nextX = xInputs[0] + 1;
+            }
+            const curX = document.getElementById('input-x-list').value.trim();
+            const curY = document.getElementById('input-y-list').value.trim();
+            document.getElementById('input-x-list').value = curX ? `${curX}, ${nextX}` : `${nextX}`;
+            document.getElementById('input-y-list').value = curY ? `${curY}, 0` : `0`;
+            syncTextareasToInteractiveTable();
+            runCalculation();
+        }
+
+        function removeLastTableRow() {
+            const xArr = document.getElementById('input-x-list').value.split(',').map(s => s.trim()).filter(s => s !== '');
+            const yArr = document.getElementById('input-y-list').value.split(',').map(s => s.trim()).filter(s => s !== '');
+            if (xArr.length <= 2) return;
+            xArr.pop();
+            yArr.pop();
+            document.getElementById('input-x-list').value = xArr.join(', ');
+            document.getElementById('input-y-list').value = yArr.join(', ');
+            syncTextareasToInteractiveTable();
+            runCalculation();
+        }
+
+        // Escuchar cambios directos en los textareas de listas
+        document.getElementById('input-x-list').addEventListener('input', () => {
+            syncTextareasToInteractiveTable();
+        });
+        document.getElementById('input-y-list').addEventListener('input', () => {
+            syncTextareasToInteractiveTable();
+        });
+
+        /**
+         * VALIDACIÓN Y EJECUCIÓN PRINCIPAL DE CÁLCULO
+         */
+        function showValidationError(title, msg) {
+            const alertBox = document.getElementById('validation-alert');
+            alertBox.classList.remove('hidden');
+            document.getElementById('validation-alert-title').textContent = title;
+            document.getElementById('validation-alert-msg').textContent = msg;
+
+            const iconBox = document.getElementById('status-icon-box');
+            iconBox.className = 'w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center font-bold mono text-sm';
+            iconBox.textContent = 'ERR';
+        }
+
+        function hideValidationError() {
+            document.getElementById('validation-alert').classList.add('hidden');
+            const iconBox = document.getElementById('status-icon-box');
+            iconBox.className = 'w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold mono text-sm';
+            iconBox.textContent = 'OK';
+        }
+
+        function formatErrorHTML(approxVal, refVal) {
+            if (refVal === null || isNaN(refVal)) {
+                return `<span class="text-slate-400">Sin valor exacto de referencia</span>`;
+            }
+            const ea = Math.abs(refVal - approxVal);
+            const ep = refVal !== 0 ? (100 * ea / Math.abs(refVal)) : 0;
+            return `
+                <span>Eₐ = <strong class="mono text-slate-800">${ea.toExponential(3)}</strong></span>
+                <span class="px-1.5 py-0.5 rounded bg-slate-100 font-semibold mono text-slate-800">E% = ${ep.toFixed(4)}%</span>
+            `;
+        }
+
+        function formatNumberSmart(val) {
+            if (val === null || isNaN(val)) return '—';
+            if (Math.abs(val) >= 1e6 || (Math.abs(val) > 0 && Math.abs(val) < 1e-4)) {
+                return val.toExponential(8);
+            }
+            return val.toFixed(6);
+        }
+
+        function runCalculation() {
+            hideValidationError();
+
+            let xNodes = [];
+            let yRawNodes = [];
+            let fNodes = [];
+            let scaleFactor = 1;
+            let units = document.getElementById('input-units').value.trim();
+
+            if (currentInputMode === 'table') {
+                const xStrArr = document.getElementById('input-x-list').value.split(',').map(s => s.trim()).filter(s => s !== '');
+                const yStrArr = document.getElementById('input-y-list').value.split(',').map(s => s.trim()).filter(s => s !== '');
+
+                if (xStrArr.length !== yStrArr.length) {
+                    showValidationError('Listas de longitud desigual', `Se ingresaron ${xStrArr.length} valores para x pero ${yStrArr.length} valores para y. Ambas listas deben tener exactamente la misma cantidad de elementos.`);
+                    return;
+                }
+                if (xStrArr.length < 2) {
+                    showValidationError('Datos insuficientes', 'Se requieren al menos 2 nodos (1 subintervalo) para integrar.');
+                    return;
+                }
+
+                for (let i = 0; i < xStrArr.length; i++) {
+                    const xv = evaluateMathExpression(xStrArr[i]);
+                    const yv = evaluateMathExpression(yStrArr[i]);
+                    if (isNaN(xv) || isNaN(yv)) {
+                        showValidationError('Datos no numéricos detectados', `El par en la posición i = ${i} contiene valores inválidos (${xStrArr[i]}, ${yStrArr[i]}).`);
+                        return;
+                    }
+                    xNodes.push(xv);
+                    yRawNodes.push(yv);
+                }
+
+                // Verificar que x sea estrictamente creciente y con espaciamiento uniforme h
+                const n = xNodes.length - 1;
+                const hExpected = (xNodes[n] - xNodes[0]) / n;
+                if (hExpected <= 0) {
+                    showValidationError('Abscisas x no crecientes', 'Los valores de x deben estar ordenados de forma estrictamente creciente (x₀ < x₁ < ... < xₙ).');
+                    return;
+                }
+
+                for (let i = 1; i <= n; i++) {
+                    const step = xNodes[i] - xNodes[i - 1];
+                    if (step <= 0) {
+                        showValidationError('Orden de x inválido', `x_${i} (${xNodes[i]}) debe ser mayor que x_${i-1} (${xNodes[i-1]}).`);
+                        return;
+                    }
+                    if (Math.abs(step - hExpected) > 1e-5 * Math.max(1, Math.abs(hExpected))) {
+                        showValidationError('Espaciamiento no uniforme', `Los métodos compuestos de esta guía requieren nodos equiespaciados. El paso entre x_${i-1} y x_${i} es ${step.toFixed(4)}, distinto del paso promedio h = ${hExpected.toFixed(4)}.`);
+                        return;
+                    }
+                }
+
+                const transformExpr = document.getElementById('input-table-transform').value.trim() || 'y';
+                for (let i = 0; i <= n; i++) {
+                    const fv = evaluateMathExpression(transformExpr, { x: xNodes[i], y: yRawNodes[i] });
+                    if (isNaN(fv)) {
+                        showValidationError('Error en transformación g(y)', `No se pudo evaluar la expresión "${transformExpr}" en el nodo i = ${i}.`);
+                        return;
+                    }
+                    fNodes.push(fv);
+                }
+
+                const sf = evaluateMathExpression(document.getElementById('input-scale-factor').value.trim() || '1');
+                scaleFactor = isNaN(sf) ? 1 : sf;
+
+            } else {
+                // Modo Función f(x)
+                const expr = document.getElementById('input-fn-expr').value.trim();
+                const a = evaluateMathExpression(document.getElementById('input-fn-a').value.trim());
+                const b = evaluateMathExpression(document.getElementById('input-fn-b').value.trim());
+                const n = parseInt(document.getElementById('input-fn-n').value, 10);
+
+                if (isNaN(a) || isNaN(b) || b <= a) {
+                    showValidationError('Límites de integración inválidos', 'Asegúrate de que a y b sean numéricos y que b > a.');
+                    return;
+                }
+                if (isNaN(n) || n < 1 || n > 1000) {
+                    showValidationError('Número de subintervalos n inválido', 'El valor de n debe ser un entero positivo entre 1 y 1000.');
+                    return;
+                }
+
+                const h = (b - a) / n;
+                for (let i = 0; i <= n; i++) {
+                    const xi = a + i * h;
+                    const yi = evaluateMathExpression(expr, { x: xi });
+                    if (isNaN(yi)) {
+                        showValidationError('Error al evaluar f(x)', `La función "${expr}" produjo un valor no numérico en x = ${xi.toFixed(4)}.`);
+                        return;
+                    }
+                    xNodes.push(xi);
+                    yRawNodes.push(yi);
+                    fNodes.push(yi);
+                }
+                scaleFactor = 1;
+            }
+
+            // Parámetros de malla validados
+            const n = xNodes.length - 1;
+            const a = xNodes[0];
+            const b = xNodes[n];
+            const h = (b - a) / n;
+
+            const refStr = document.getElementById('input-ref-val').value.trim();
+            const refVal = refStr !== '' ? evaluateMathExpression(refStr) : null;
+
+            // Actualizar barra de estado de malla
+            document.getElementById('mesh-summary').textContent = `n = ${n} subintervalos (${n + 1} nodos) | h = ${h.toFixed(6)} | [${a.toFixed(2)}, ${b.toFixed(2)}]`;
+            document.getElementById('graph-interval-label').textContent = `[${a.toFixed(2)}, ${b.toFixed(2)}]`;
+
+            // Ejecutar los 4 métodos
+            const trapRes = compositeTrapezoid(fNodes, h);
+            const s13Res = compositeSimpson13(fNodes, h);
+            const s38Res = compositeSimpson38(fNodes, h);
+            const strategyHint = EXERCISES_DB[currentExerciseId]?.combinedStrategy || 'AUTO';
+            const combRes = compositeCombinedSimpson(fNodes, h, strategyHint);
+
+            // 1. Renderizar Trapecio
+            const trapFinal = trapRes.integral * scaleFactor;
+            document.getElementById('res-trap-val').textContent = `${formatNumberSmart(trapFinal)} ${units}`;
+            document.getElementById('res-trap-raw').textContent = scaleFactor !== 1
+                ? `Integral sin escalar: ${trapRes.integral.toFixed(6)} (Factor: ×${scaleFactor.toFixed(6)})`
+                : `Suma ponderada Σwᵢfᵢ = ${trapRes.weightedSum.toFixed(6)}`;
+            document.getElementById('res-trap-err').innerHTML = formatErrorHTML(trapFinal, refVal);
+
+            // 2. Renderizar Simpson 1/3
+            const badgeS13 = document.getElementById('badge-s13-req');
+            if (s13Res) {
+                const s13Final = s13Res.integral * scaleFactor;
+                badgeS13.textContent = `Activo (n=${n} par)`;
+                badgeS13.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800';
+                document.getElementById('res-s13-val').textContent = `${formatNumberSmart(s13Final)} ${units}`;
+                document.getElementById('res-s13-raw').textContent = `Paso h/3 = ${(h / 3).toFixed(6)}`;
+                document.getElementById('res-s13-err').innerHTML = formatErrorHTML(s13Final, refVal);
+            } else {
+                badgeS13.textContent = `Incompatible (n=${n} impar)`;
+                badgeS13.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800';
+                document.getElementById('res-s13-val').innerHTML = `<span class="text-sm text-slate-400 font-normal">Requiere n par (ver Combinado)</span>`;
+                document.getElementById('res-s13-raw').textContent = `Con n = ${n} usa la tarjeta 4 (Simpson Combinado)`;
+                document.getElementById('res-s13-err').innerHTML = `<span class="text-slate-400">No aplica directamente para n impar</span>`;
+            }
+
+            // 3. Renderizar Simpson 3/8
+            const badgeS38 = document.getElementById('badge-s38-req');
+            if (s38Res) {
+                const s38Final = s38Res.integral * scaleFactor;
+                badgeS38.textContent = `Activo (n=${n} músc. 3)`;
+                badgeS38.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800';
+                document.getElementById('res-s38-val').textContent = `${formatNumberSmart(s38Final)} ${units}`;
+                document.getElementById('res-s38-raw').textContent = `Paso 3h/8 = ${(3 * h / 8).toFixed(6)}`;
+                document.getElementById('res-s38-err').innerHTML = formatErrorHTML(s38Final, refVal);
+            } else {
+                badgeS38.textContent = `Incompatible (n=${n} no músc. 3)`;
+                badgeS38.className = 'text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600';
+                document.getElementById('res-s38-val').innerHTML = `<span class="text-sm text-slate-400 font-normal">Requiere n múltiplo de 3</span>`;
+                document.getElementById('res-s38-raw').textContent = `Ej: n = 3, 6, 9, 12... (actual n = ${n})`;
+                document.getElementById('res-s38-err').innerHTML = `<span class="text-slate-400">No aplica directamente si n % 3 ≠ 0</span>`;
+            }
+
+            // 4. Renderizar Combinado / Mejor Estimación
+            const combFinal = combRes.integral * scaleFactor;
+            document.getElementById('badge-comb-desc').textContent = combRes.description;
+            document.getElementById('res-comb-val').textContent = `${formatNumberSmart(combFinal)} ${units}`;
+            document.getElementById('res-comb-raw').textContent = refVal !== null && !isNaN(refVal)
+                ? `Referencia exacta: ${formatNumberSmart(refVal)} ${units}`
+                : `Óptimo compuesto para n = ${n}`;
+            document.getElementById('res-comb-err').innerHTML = formatErrorHTML(combFinal, refVal);
+
+            // Conversión SI si el ejercicio actual la tiene y no se cambiaron las unidades base
+            const curEx = EXERCISES_DB[currentExerciseId];
+            const convContainer = document.getElementById('conversion-badge-container');
+            if (curEx && curEx.siConversion && units === curEx.units) {
+                convContainer.classList.remove('hidden');
+                document.getElementById('conversion-badge-text').textContent = `≈ ${curEx.siConversion(combFinal)}`;
+            } else {
+                convContainer.classList.add('hidden');
+            }
+
+            // Actualizar tabla de pesos
+            const tbodyWeights = document.getElementById('weights-table-body');
+            tbodyWeights.innerHTML = '';
+            for (let i = 0; i <= n; i++) {
+                const tr = document.createElement('tr');
+                tr.className = i % 2 === 0 ? 'bg-white' : 'bg-slate-50/60';
+                tr.innerHTML = `
+                    <td class="py-2 px-3 font-bold text-slate-700">${i}</td>
+                    <td class="py-2 px-3">${xNodes[i].toFixed(4)}</td>
+                    <td class="py-2 px-3 text-slate-500">${yRawNodes[i].toFixed(4)}</td>
+                    <td class="py-2 px-3 font-semibold text-emerald-800">${fNodes[i].toFixed(6)}</td>
+                    <td class="py-2 px-3 text-sky-700">${trapRes.weights[i]}·h</td>
+                    <td class="py-2 px-3 text-emerald-700">${s13Res ? s13Res.weights[i] + '·h' : '—'}</td>
+                    <td class="py-2 px-3 text-indigo-700">${s38Res ? s38Res.weights[i] + '·h' : '—'}</td>
+                    <td class="py-2 px-3 text-amber-800">${combRes.weights[i]}·h</td>
+                `;
+                tbodyWeights.appendChild(tr);
+            }
+
+            // Guardar y dibujar gráfico
+            lastComputedPlotData = {
+                xNodes,
+                fNodes,
+                mode: currentInputMode,
+                fnExpr: currentInputMode === 'function' ? document.getElementById('input-fn-expr').value.trim() : null
+            };
+            drawIntegrationCanvas(lastComputedPlotData);
+        }
+
+        /**
+         * RENDERIZADO DEL GRÁFICO EN CANVAS 2D (RESPONSIVO)
+         */
+        function drawIntegrationCanvas(plotData) {
+            if (!plotData) return;
+            const canvas = document.getElementById('integration-canvas');
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+
+            const W = rect.width;
+            const H = rect.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const { xNodes, fNodes, mode, fnExpr } = plotData;
+            const n = xNodes.length - 1;
+            const xMin = xNodes[0];
+            const xMax = xNodes[n];
+
+            let yMin = Math.min(0, ...fNodes);
+            let yMax = Math.max(...fNodes);
+            if (yMax === yMin) yMax = yMin + 1;
+            const yPad = (yMax - yMin) * 0.12;
+            yMax += yPad;
+            if (yMin < 0) yMin -= yPad;
+
+            const padL = 56, padR = 24, padT = 20, padB = 34;
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+
+            const toX = (x) => padL + ((x - xMin) / (xMax - xMin)) * plotW;
+            const toY = (y) => padT + plotH - ((y - yMin) / (yMax - yMin)) * plotH;
+
+            // Cuadrícula de fondo
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.font = '10px JetBrains Mono, monospace';
+            ctx.fillStyle = '#64748b';
+
+            const yTicks = 4;
+            for (let i = 0; i <= yTicks; i++) {
+                const val = yMin + (i / yTicks) * (yMax - yMin);
+                const py = toY(val);
+                ctx.beginPath();
+                ctx.moveTo(padL, py);
+                ctx.lineTo(W - padR, py);
+                ctx.stroke();
+
+                const lbl = Math.abs(val) >= 10000 ? val.toExponential(1) : val.toFixed(1);
+                ctx.textAlign = 'right';
+                ctx.fillText(lbl, padL - 6, py + 3);
+            }
+
+            // Polígonos de los Trapecios
+            const yZero = toY(0);
+            for (let i = 0; i < n; i++) {
+                const x0 = toX(xNodes[i]);
+                const x1 = toX(xNodes[i + 1]);
+                const y0 = toY(fNodes[i]);
+                const y1 = toY(fNodes[i + 1]);
+
+                ctx.fillStyle = i % 2 === 0 ? 'rgba(16, 185, 129, 0.22)' : 'rgba(20, 184, 166, 0.14)';
+                ctx.beginPath();
+                ctx.moveTo(x0, yZero);
+                ctx.lineTo(x0, y0);
+                ctx.lineTo(x1, y1);
+                ctx.lineTo(x1, yZero);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.55)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            // Si es modo función continua, dibujar también la curva analítica suave
+            if (mode === 'function' && fnExpr) {
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const steps = 120;
+                for (let s = 0; s <= steps; s++) {
+                    const xv = xMin + (s / steps) * (xMax - xMin);
+                    const yv = evaluateMathExpression(fnExpr, { x: xv });
+                    if (!isNaN(yv)) {
+                        const px = toX(xv);
+                        const py = toY(yv);
+                        if (s === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                }
+                ctx.stroke();
+            } else {
+                // Conectar los nodos con línea sólida
+                ctx.strokeStyle = '#059669';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                for (let i = 0; i <= n; i++) {
+                    const px = toX(xNodes[i]);
+                    const py = toY(fNodes[i]);
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+
+            // Eje X en y=0
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(padL, yZero);
+            ctx.lineTo(W - padR, yZero);
+            ctx.stroke();
+
+            // Dibujar los nodos y etiquetas en X
+            const maxLabels = Math.min(n + 1, 13);
+            const labelStep = Math.max(1, Math.ceil((n + 1) / maxLabels));
+
+            for (let i = 0; i <= n; i++) {
+                const px = toX(xNodes[i]);
+                const py = toY(fNodes[i]);
+
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (i % labelStep === 0 || i === n) {
+                    ctx.fillStyle = '#475569';
+                    ctx.textAlign = 'center';
+                    const xLbl = Math.abs(xNodes[i]) >= 10000 ? xNodes[i].toExponential(1) : Number(xNodes[i].toFixed(2));
+                    ctx.fillText(xLbl, px, H - 10);
+                }
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (lastComputedPlotData && !document.getElementById('view-simulador').classList.contains('hidden')) {
+                drawIntegrationCanvas(lastComputedPlotData);
+            }
+        });
+
+        /**
+         * TABLA GENERAL DE RESULTADOS DE TODOS LOS EJERCICIOS (VISTA 2)
+         */
+        function evaluateExerciseProgrammatically(ex) {
+            let xNodes = [];
+            let fNodes = [];
+            const scale = evaluateMathExpression(ex.scaleFactor || '1');
+
+            if (ex.mode === 'table') {
+                xNodes = [...ex.xData];
+                const transform = ex.transform || 'y';
+                fNodes = ex.yData.map((yv, idx) => evaluateMathExpression(transform, { x: xNodes[idx], y: yv }));
+            } else {
+                const a = evaluateMathExpression(ex.a);
+                const b = evaluateMathExpression(ex.b);
+                const n = ex.n;
+                const h = (b - a) / n;
+                for (let i = 0; i <= n; i++) {
+                    const xi = a + i * h;
+                    xNodes.push(xi);
+                    fNodes.push(evaluateMathExpression(ex.fnExpr, { x: xi }));
+                }
+            }
+
+            const n = xNodes.length - 1;
+            const h = (xNodes[n] - xNodes[0]) / n;
+
+            const trap = compositeTrapezoid(fNodes, h);
+            const comb = compositeCombinedSimpson(fNodes, h, ex.combinedStrategy || 'AUTO');
+            const trapVal = trap.integral * scale;
+            const simpsonVal = comb.integral * scale;
+            const refVal = ex.refValue ? evaluateMathExpression(ex.refValue) : null;
+            const errPct = (refVal !== null && !isNaN(refVal) && refVal !== 0)
+                ? (100 * Math.abs(refVal - simpsonVal) / Math.abs(refVal))
+                : null;
+
+            return {
+                n,
+                h,
+                trapVal,
+                simpsonVal,
+                simpsonDesc: comb.description,
+                refVal,
+                errPct
+            };
+        }
+
+        function renderAllExercisesSummaryTable() {
+            const tbody = document.getElementById('all-exercises-tbody');
+            const cardsGrid = document.getElementById('all-explanations-grid');
+            tbody.innerHTML = '';
+            cardsGrid.innerHTML = '';
+
+            Object.values(EXERCISES_DB).forEach(ex => {
+                const res = evaluateExerciseProgrammatically(ex);
+                const siExtra = ex.siConversion ? `<div class="text-[11px] text-amber-700 font-semibold mt-0.5">≈ ${ex.siConversion(res.simpsonVal)}</div>` : '';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="py-3.5 px-3">
+                        <div class="font-bold text-slate-900">${ex.shortTitle}</div>
+                        <div class="text-[11px] text-slate-500">${ex.mode === 'table' ? 'Datos tabulados' : 'Función continua'}</div>
+                    </td>
+                    <td class="py-3.5 px-3 font-semibold text-slate-700">${ex.groups.join(', ')}</td>
+                    <td class="py-3.5 px-3 mono text-[11px] text-slate-700 max-w-xs">${ex.formula}</td>
+                    <td class="py-3.5 px-3 mono text-[11px]">
+                        <div>n = <strong>${res.n}</strong></div>
+                        <div class="text-slate-500">h = ${res.h.toFixed(4)}</div>
+                    </td>
+                    <td class="py-3.5 px-3 mono font-bold text-sky-800">
+                        ${formatNumberSmart(res.trapVal)} ${ex.units}
+                    </td>
+                    <td class="py-3.5 px-3 mono">
+                        <div class="font-bold text-emerald-800">${formatNumberSmart(res.simpsonVal)} ${ex.units}</div>
+                        <div class="text-[10px] text-slate-500">${res.simpsonDesc}</div>
+                        ${siExtra}
+                    </td>
+                    <td class="py-3.5 px-3 mono text-slate-700">
+                        ${res.refVal !== null ? `${formatNumberSmart(res.refVal)} ${ex.units}` : '<span class="text-slate-400">Sin valor exacto</span>'}
+                    </td>
+                    <td class="py-3.5 px-3 mono">
+                        ${res.errPct !== null
+                            ? `<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">${res.errPct.toFixed(4)}%</span>`
+                            : '<span class="text-slate-400">—</span>'}
+                    </td>
+                    <td class="py-3.5 px-3 text-center">
+                        <button onclick="loadExercise('${ex.id}'); switchMainTab('simulador');" class="px-3 py-1.5 bg-slate-900 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition">
+                            Abrir
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // También agregar tarjeta resumen en la grilla inferior
+                const card = document.createElement('div');
+                card.className = 'p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-2';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-slate-900">${ex.title}</span>
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">Grupos ${ex.groups.join(', ')}</span>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">${ex.context}</p>
+                        <p class="text-xs text-slate-700 mt-2 bg-white p-2.5 rounded-lg border border-slate-200 leading-relaxed">
+                            <strong class="text-emerald-700">Desarrollo:</strong> ${ex.procedure}
+                        </p>
+                    </div>
+                    <div class="pt-2 flex justify-between items-center text-xs mono border-t border-slate-200/80">
+                        <span class="text-sky-800"><strong>Trapecio:</strong> ${formatNumberSmart(res.trapVal)} ${ex.units}</span>
+                        <span class="text-emerald-800"><strong>Simpson:</strong> ${formatNumberSmart(res.simpsonVal)} ${ex.units}</span>
+                    </div>
+                `;
+                cardsGrid.appendChild(card);
+            });
+        }
+
+        // Inicialización al cargar la página
+        window.onload = function () {
+            renderExerciseSelectorButtons('ALL');
+            loadExercise('19');
+            renderAllExercisesSummaryTable();
+        };
+    </script>
+</body>
+</html>
